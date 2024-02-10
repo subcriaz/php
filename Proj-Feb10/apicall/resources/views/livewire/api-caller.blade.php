@@ -1,3 +1,3 @@
 <div>
-    API Caller 786 92
+    <button wire:click="fetchUsers">Call Example Method</button>
 </div>
