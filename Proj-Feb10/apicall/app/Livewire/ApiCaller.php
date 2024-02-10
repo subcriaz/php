@@ -25,10 +25,10 @@ class ApiCaller extends Component
         $response = Http::get('http://127.0.0.1:8000/api/users');
 
         if ($response->successful()) {
-              dd($response->successful());
+              //dd($response->successful());
             $this->users = $response->json();
         } else {
-            dd($response->successful());
+            //dd($response->successful());
             session()->flash('error', 'Failed to fetch users.');
         }
     }
@@ -36,8 +36,9 @@ class ApiCaller extends Component
     public function createUser()
     {
         $response = Http::post('http://127.0.0.1:8000/api/users', [
-            'name' => $this->name,
-            'email' => $this->email,
+            'name' => '$this->name',
+            'email' => '>email99',
+            'password'=> 'password',
         ]);
 
         if ($response->successful()) {
@@ -48,6 +49,8 @@ class ApiCaller extends Component
         } else {
             session()->flash('error', 'Failed to create user.');
         }
+    dd(  $this->name);
+
     }
 
     public function selectUser($userId)
