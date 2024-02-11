@@ -15,11 +15,15 @@ class ApiCaller extends Component
     public $selectedUserId;
     public $url ;
   
-
+ public function updated()
+    {
+         $this->name =  strtoupper($this->name);
+    }
     public function mount()
     {
          $url = 'http://127.0.0.1:8000/api/users';
         //$this->fetchUsers();
+         $users = $this->fetchUsers();
     }
 
     public function fetchUsers()
@@ -46,7 +50,7 @@ class ApiCaller extends Component
         ]);
 
         if ($response->successful()) {
-            $this->fetchUsers();
+            $users = $this->fetchUsers();
             $this->name = '';
             $this->email = '';
             $this->password = '';
@@ -54,7 +58,7 @@ class ApiCaller extends Component
         } else {
             session()->flash('error', 'Failed to create user.');
         }
-    //dd(  $this->name.$this->email);
+    //dd( $this->users);
 
     }
 
