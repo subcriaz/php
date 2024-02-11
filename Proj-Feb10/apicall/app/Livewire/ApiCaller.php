@@ -29,7 +29,7 @@ class ApiCaller extends Component
         if ($response->successful()) {
             
             $this->users = $response->json();
-            dd(  $this->users);
+            //dd(  $this->users);
         } else {
             //dd($response->successful());
             session()->flash('error', 'Failed to fetch users.');
