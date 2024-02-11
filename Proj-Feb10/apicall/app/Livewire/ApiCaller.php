@@ -85,10 +85,10 @@ class ApiCaller extends Component
         }
     }
 
-    public function deleteUser()
+    public function deleteUser($Id)
     {
         //dd($this->selectedUserId);
-        $response = Http::delete('http://127.0.0.1:8000/api/users/' . $this->selectedUserId);
+        $response = Http::delete('http://127.0.0.1:8000/api/users/' . $Id);
 
         if ($response->successful()) {
             $this->fetchUsers();
