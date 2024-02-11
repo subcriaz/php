@@ -7,16 +7,18 @@ use Illuminate\Support\Facades\Http;
 
 class ApiCaller extends Component
 {
-   public $users;
+    public $users;
+    public $user;
     public $name;
     public $email;
+    public $password;
     public $selectedUserId;
     public $url ;
   
 
     public function mount()
     {
-         //$ url = 'http://127.0.0.1:8000/api/users';
+         $url = 'http://127.0.0.1:8000/api/users';
         //$this->fetchUsers();
     }
 
@@ -25,31 +27,34 @@ class ApiCaller extends Component
         $response = Http::get('http://127.0.0.1:8000/api/users');
 
         if ($response->successful()) {
-              //dd($response->successful());
+            
             $this->users = $response->json();
+            dd(  $this->users);
         } else {
             //dd($response->successful());
             session()->flash('error', 'Failed to fetch users.');
         }
+
     }
 
     public function createUser()
     {
         $response = Http::post('http://127.0.0.1:8000/api/users', [
-            'name' => '$this->name',
-            'email' => '>email99',
-            'password'=> 'password',
+            'name' => $this->name,
+            'email' => $this->email,
+            'password'=> $this->password,
         ]);
 
         if ($response->successful()) {
             $this->fetchUsers();
             $this->name = '';
             $this->email = '';
+            $this->password = '';
             session()->flash('success', 'User created successfully!');
         } else {
             session()->flash('error', 'Failed to create user.');
         }
-    dd(  $this->name);
+    //dd(  $this->name.$this->email);
 
     }
 
@@ -76,15 +81,30 @@ class ApiCaller extends Component
         }
     }
 
-    public function deleteUser($userId)
+    public function deleteUser()
     {
-        $response = Http::delete('http://127.0.0.1:8000/api/users/' . $userId);
+        //dd($this->selectedUserId);
+        $response = Http::delete('http://127.0.0.1:8000/api/users/' . $this->selectedUserId);
 
         if ($response->successful()) {
             $this->fetchUsers();
+            $this->selectedUserId = null;
             session()->flash('success', 'User deleted successfully!');
         } else {
             session()->flash('error', 'Failed to delete user.');
+        }
+    }
+
+ public function getUserById()
+    {
+        $response = Http::get('http://127.0.0.1:8000/api/users/' . $this->selectedUserId);
+        
+        if ($response->successful()) {
+            $this->user = $response->json();
+            dd(  $this->user);
+            session()->flash('success', 'User got successfully!');
+        } else {
+            session()->flash('error', 'Failed to update user.');
         }
     }
 
