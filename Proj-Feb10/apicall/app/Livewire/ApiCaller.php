@@ -38,7 +38,7 @@ class ApiCaller extends Component
             //dd($response->successful());
             session()->flash('error', 'Failed to fetch users.');
         }
-
+        //return view('livewire.show-user');
     }
 
     public function createUser()
