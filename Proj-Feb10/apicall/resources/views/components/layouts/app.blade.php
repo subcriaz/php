@@ -8,8 +8,11 @@
     </head>
     <body>
         <nav>
-            <a href="/">New User</a>
+           
+            <a href="/addnew">Add New </a>
              <a href="/show">Show Users</a>
+             <a href="/showone">Single</a>
+              <a href="/sayhello">Hellow</a>
         </nav>
         {{ $slot }}
     </body>

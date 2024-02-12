@@ -1,10 +1,13 @@
 <div>
-    show user
+     
+
+    show userssss
     <table>
         <thead><tr>
         <th>name</th>
         <th>email</th>
         <th>password</th>
+        <th>Show</th>
          <th>Edit</th>
          <th>delete</th>
         </tr></thead>
@@ -15,10 +18,17 @@
         <td>{{$user['email']}}</td>
         <td>email</td>
         <td>
-            <button type="button" wire:click="deleteUser({{$user['id']}})"
-            wire:confirm="want to delete?"
+            <button type="button" wire:click="getUserById({{$user['id']}})"
+            wire:confirm="want to show?"
             >
-            Edit
+            show one
+             </button>
+        </td>
+        <td>
+            <button type="button" wire:click="editUserById({{$user['id']}})"
+            wire:confirm="want to show?"
+            >
+            Edit one
              </button>
         </td>
         <td>
@@ -32,4 +42,6 @@
     @endforeach
 
 </table>
+
+
 </div>

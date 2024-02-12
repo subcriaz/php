@@ -1,4 +1,12 @@
 <div>
+
+
+    @if (session()->has('flash'))
+    <div class="alert alert-success">
+        {{ session('flash') }}
+    </div>
+    @endif
+    
     <input wire:model="selectedUserId" type="text"></br>
     <input wire:model="name" type="text"></br>
     <input wire:model="email" type="text"></br>

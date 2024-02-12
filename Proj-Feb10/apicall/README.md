@@ -10,3 +10,4 @@ composer update
 
  [http://127.0.0.1:9000].
 php artisan livewire:layout
+

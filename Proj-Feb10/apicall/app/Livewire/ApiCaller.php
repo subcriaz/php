@@ -87,7 +87,7 @@ class ApiCaller extends Component
 
     public function deleteUser($Id)
     {
-        //dd($this->selectedUserId);
+        //dd($Id);
         $response = Http::delete('http://127.0.0.1:8000/api/users/' . $Id);
 
         if ($response->successful()) {
@@ -99,9 +99,9 @@ class ApiCaller extends Component
         }
     }
 
- public function getUserById()
+ public function getUserById($Id)
     {
-        $response = Http::get('http://127.0.0.1:8000/api/users/' . $this->selectedUserId);
+        $response = Http::get('http://127.0.0.1:8000/api/users/' . $Id);
         
         if ($response->successful()) {
             $this->user = $response->json();
