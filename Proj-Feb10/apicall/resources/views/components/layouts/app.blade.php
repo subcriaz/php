@@ -8,8 +8,8 @@
     </head>
     <body>
         <nav>
-            <a href="/">Users</a>
-             <a href="/">Users</a>
+            <a href="/">New User</a>
+             <a href="/show">Show Users</a>
         </nav>
         {{ $slot }}
     </body>
