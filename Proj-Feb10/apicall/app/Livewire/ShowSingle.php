@@ -28,5 +28,14 @@ class ShowSingle extends Component
         return view('livewire.show-single');
     }
 
+    //public $title;
+    //public $content;
+ 
+    public function mount($Id)
+    {
+        //$this->title = $post->title;
+        //$this->content = $post->content;
+    }
+
    
 }

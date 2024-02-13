@@ -1,7 +1,18 @@
 <div>
      
 
-    show userssss
+    @if (session('error'))
+    <div class="alert alert-error">
+        {{ session('error') }}
+    </div>
+    @endif
+
+    @if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+    @endif
+
     <table>
         <thead><tr>
         <th>name</th>
@@ -17,6 +28,7 @@
         <td>{{$user['name']}}</td>
         <td>{{$user['email']}}</td>
         <td>email</td>
+
         <td>
             <button type="button" wire:click="getUserById({{$user['id']}})"
             wire:confirm="want to show?"
@@ -24,6 +36,7 @@
             show one
              </button>
         </td>
+
         <td>
             <button type="button" wire:click="editUserById({{$user['id']}})"
             wire:confirm="want to show?"
@@ -31,6 +44,7 @@
             Edit one
              </button>
         </td>
+
         <td>
             <button type="button" wire:click="deleteUser({{$user['id']}})"
             wire:confirm="want to delete?"
@@ -38,6 +52,7 @@
             delete
              </button>
         </td>
+
     </tr>
     @endforeach
 

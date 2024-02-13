@@ -60,13 +60,19 @@ class ShowUser extends Component
             $this->user = $response->json();
             //dd(  $this->user);
             session()->flash('success', 'User got successfully!');
+            //return redirect()->to('/showone?id='.$Id);
+            //return view('show-single', ['id' => $Id]);
+
+            return view('livewire.show-single', ['mId' => $Id, ]);
+
+
         } else {
             session()->flash('error', 'Failed to get user.');
         }
         
         //return view('livewire.show-single');
 
-          return redirect()->to('/showone');
+          
 
     }
 

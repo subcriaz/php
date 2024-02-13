@@ -37,10 +37,11 @@ class AddUser extends Component
             $this->email = '';
             $this->password = '';
             session()->flash('success', 'User created successfully!');
+            return redirect()->to('/show');
         } else {
             session()->flash('error', 'Failed to create user.');
         }
-    return redirect()->to('/show');
+   
 
     }
 }
