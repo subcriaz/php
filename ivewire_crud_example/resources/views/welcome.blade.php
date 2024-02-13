@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Laravel 10 Livewire CRUD Operation Example - Techsolutionstuff</title>
+    <title>Laravel 10 Livewire CRUD Operation</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     @livewireStyles
 </head>
@@ -12,7 +12,7 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">
-                        <h2>Laravel 10 Livewire CRUD Operation Example - Techsolutionstuff</h2>
+                        <h2>Laravel 10 Livewire CRUD Operations</h2>
                     </div>
                     <div class="card-body">
                         @if (session()->has('message'))
