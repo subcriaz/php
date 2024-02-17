@@ -82,7 +82,7 @@ INSERT INTO `batch` (`id`, `batch_id`, `account_head`, `amount`, `due_date`, `su
 -- Table structure for table `member`
 --
 
-CREATE TABLE `member` (
+CREATE TABLE `members` (
   `id` int(11) DEFAULT NULL,
   `reg_no` varchar(512) DEFAULT NULL,
   `name` varchar(512) DEFAULT NULL,
@@ -99,7 +99,7 @@ CREATE TABLE `member` (
 -- Dumping data for table `member`
 --
 
-INSERT INTO `member` (`id`, `reg_no`, `name`, `address`, `contact`, `allotted`, `pref_size`, `property_id`, `batch_id`, `member_reg_no`) VALUES
+INSERT INTO `members` (`id`, `reg_no`, `name`, `address`, `contact`, `allotted`, `pref_size`, `property_id`, `batch_id`, `member_reg_no`) VALUES
 (1, 'RV-001', 'Alex', 'XYZ Town', '03344132940', 'no', '3 Marla', 'null', '1 ', '- '),
 (2, 'RV-002', 'Bob', 'ABC Town', '3344992999', 'yes', '5 Marla', '2', '2 ', 'RV-002 '),
 (3, 'RV-003', 'Cris', 'Square 12', '3344132944', 'no', '7 Marla', 'null', '3', '-');

@@ -21,7 +21,7 @@
                                 {{ session('message') }}
                             </div>
                         @endif
-                        @livewire('posts')
+                        @livewire('members')
                     </div>
                 </div></div>
         </div>
