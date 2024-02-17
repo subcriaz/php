@@ -77,6 +77,7 @@ INSERT INTO `batch` (`id`, `batch_id`, `account_head`, `amount`, `due_date`, `su
 --
 
 CREATE TABLE `member` (
+  `id` int(11) DEFAULT NULL,
   `reg_no` varchar(512) DEFAULT NULL,
   `name` varchar(512) DEFAULT NULL,
   `address` varchar(512) DEFAULT NULL,
@@ -156,3 +157,27 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+select * from member; --
+select * from property;
+select * from acc_head;
+select * from batch;
+select * from payment; 
+-- //////////////////////////
+
+select * from member as m, property as pr where m.property_id=pr.id;
+SELECT * FROM member INNER JOIN property on member.property_id = property.id;
+SELECT * FROM member INNER JOIN batch on member.property_id = batch.id;
+
+
+
+select * from acc_head;
+select * from batch;
+select * from payment;
+
+Here are the different types of the JOINs in SQL:
+
+(INNER) JOIN: Returns records that have matching values in both tables
+LEFT (OUTER) JOIN: Returns all records from the left table, and the matched records from the right table
+RIGHT (OUTER) JOIN: Returns all records from the right table, and the matched records from the left table
+FULL (OUTER) JOIN: Returns all records when there is a match in either left or right table
