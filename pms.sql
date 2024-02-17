@@ -169,11 +169,24 @@ select * from member as m, property as pr where m.property_id=pr.id;
 SELECT * FROM member INNER JOIN property on member.property_id = property.id;
 SELECT * FROM member INNER JOIN batch on member.property_id = batch.id;
 
+// batch 
+SELECT batch.*, member.reg_no
+FROM batch
+JOIN member ON member.batch_id = 2
+ORDER BY batch.id;
+
+/////////////  statement /////////
+// payments 
+SELECT member.reg_no, member.name , member.address , payment.*  
+FROM payment
+join member ON member.reg_no = 'RV-002'
+
+select  member.name , member.address from member where member_reg_no ='RV-002';
+
+select  property.* from property where property.member_reg_no ='RV-002';
 
 
-select * from acc_head;
-select * from batch;
-select * from payment;
+//////////////////////////////////
 
 Here are the different types of the JOINs in SQL:
 
