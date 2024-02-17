@@ -28,12 +28,12 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `acc_head` (
-  `id` varchar(512) DEFAULT NULL,
-  `account_head` varchar(512) DEFAULT NULL,
-  `account_type` varchar(512) DEFAULT NULL,
-  `show_in_account_report` varchar(512) DEFAULT NULL,
-  `show_in_account_statement` varchar(512) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+ `id` varchar(512) DEFAULT NULL,
+ `acc_title` varchar(512) DEFAULT NULL,
+ `acc_type` varchar(512) DEFAULT NULL,
+ `show_in_acc_report` varchar(512) DEFAULT NULL,
+ `show_in_acc_statement` varchar(512) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci
 
 --
 -- Dumping data for table `acc_head`
