@@ -108,6 +108,7 @@ CREATE TABLE `payment` (
   `id` int(11) DEFAULT NULL,
   `reg_no` varchar(512) DEFAULT NULL,
   `acc_head` varchar(512) DEFAULT NULL,
+  `account_type` varchar(512) DEFAULT NULL,
   `amount_due` varchar(512) DEFAULT NULL,
   `amount_paid` varchar(512) DEFAULT NULL,
   `date_due` varchar(512) DEFAULT NULL,
@@ -118,13 +119,13 @@ CREATE TABLE `payment` (
 -- Dumping data for table `payment`
 --
 
-INSERT INTO `payment` (`id`, `reg_no`, `acc_head`, `amount_due`, `amount_paid`, `date_due`, `date_paid`) VALUES
-(1, 'RV-002', 'down payment', '500,000', '500,000', 'null', 'null'),
-(2, 'RV-002', 'land cost installment 1', '75,000', '75,000', '1-15-2024', '1-15-2024'),
-(3, 'RV-002', 'land cost installment 2', '75,000', '75,000', '4-15-2024', '4-25-2024 '),
-(4, 'RV-002', 'land cost installment 3', '75,000', '75,000', '7-15-2024', '8-15-2024'),
-(5, 'RV-002', 'land cost installment 4', '75,000', '75,000', '10-15-2024', '8-15-2024'),
-(6, 'RV-002', 'land cost installment 5', '75,000', '75,000', '1-15-2025', '2-15-2025');
+INSERT INTO `payment` (`id`, `reg_no`, `acc_head`,  `account_type` , `amount_due`, `amount_paid`, `date_due`, `date_paid`) VALUES
+(1, 'RV-002', 'down payment'           , 'batch account' ,'500,000','500,000', 'null', 'null'),
+(2, 'RV-002', 'land cost installment 1', 'batch account' ,'75,000', '75,000', '1-15-2024', '1-15-2024'),
+(3, 'RV-002', 'land cost installment 2', 'batch account' ,'75,000', '75,000', '4-15-2024', '4-25-2024 '),
+(4, 'RV-002', 'land cost installment 3', 'batch account' ,'75,000', '75,000', '7-15-2024', '8-15-2024'),
+(5, 'RV-002', 'land cost installment 4', 'non batch account' ,'75,000', '75,000', '10-15-2024', '8-15-2024'),
+(6, 'RV-002', 'land cost installment 5', 'non batch account' ,'75,000', '75,000', '1-15-2025', '2-15-2025');
 
 -- --------------------------------------------------------
 
@@ -177,6 +178,16 @@ ORDER BY batch.id;
 
 /////////////  statement /////////
 // payments 
+
+SELECT member.reg_no, member.name , member.address , payment.*  
+FROM payment
+join member ON member.reg_no = 'RV-002' 
+
+where payment.account_type = 'batch account'
+where payment.account_type <> 'batch account'
+
+
+
 SELECT member.reg_no, member.name , member.address , payment.*  
 FROM payment
 join member ON member.reg_no = 'RV-002'
