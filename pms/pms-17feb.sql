@@ -39,10 +39,16 @@ CREATE TABLE `acc_head` (
 -- Dumping data for table `acc_head`
 --
 
-INSERT INTO `acc_head` (`id`, `account_head`, `account_type`, `show_in_account_report`, `show_in_account_statement`) VALUES
+INSERT INTO `acc_head` (`id`,`acc_title`, `acc_type`, `show_in_acc_report`, `show_in_acc_statement`) VALUES
+
 ('1', 'down payment', 'batch account', 'TRUE', 'TRUE '),
-('2', 'land cost installment 1', 'batch account', 'TRUE', 'TRUE '),
-('3', 'land cost installment 2', 'batch account', 'TRUE', 'TRUE');
+('2', 'land cost installment 1', 'batch account', 'TRUE', 'TRUE'),
+('3', 'land cost installment 2', 'batch account', 'TRUE', 'TRUE'),
+('4', 'land cost installment 3', 'batch account', 'TRUE', 'TRUE'),
+('5', 'land cost installment 4', 'batch account', 'TRUE', 'TRUE'),
+('6', 'mosque fund', 'batch account', 'TRUE', 'FALSE')
+
+;
 
 -- --------------------------------------------------------
 
