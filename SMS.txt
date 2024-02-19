@@ -1,0 +1,86 @@
+Sub Click(Source As Button)
+	Call SendSMS()
+End Sub
+
+
+Sub SendSMS()
+    ' Define Notify92 API credentials
+	Const username = "sis"
+	Const password = "abcd1234"
+	Const mask = "DHAI-R"
+	
+    ' Define recipient's phone number and message
+	Dim to_number As String
+	Dim message As String
+	
+    ' Prompt the user to input recipient's phone number and message
+	to_number = Inputbox("Enter recipient's phone number:", "Recipient's Phone Number", "")
+	''message = Inputbox("Enter message:", "Message", "")
+	
+	
+    ' Assign static message content
+	message = "Dear Member DHAI-R is pleased to welcome you as our prestigious member having Membership No Dated ."
+	
+	
+	
+    ' Optionally, save the document
+    ' uidoc.Save
+	
+    ' Optionally, close the document
+    ' uidoc.Close	
+  ' Construct the URL
+	Dim url As String
+	url = "https://sym.notify92.com/api/quick/message?user=" & username & "&password=" & password & "&mask=" & mask & "&to=" & to_number & "&message=" & message
+	
+    ' Create MSXML2.ServerXMLHTTP object
+	Dim http As Variant
+	Set http = CreateObject("MSXML2.ServerXMLHTTP")
+	
+    ' Open connection to the URL
+	http.Open "GET", url, False
+	
+    ' Send the HTTP request
+	http.Send
+	
+    ' Check if the request was successful (status code 200)
+	If http.Status = 200 Then
+        ' Display success message
+		Print "SMS sent successfully!"
+	Else
+        ' Display error message
+		Print "Failed to send SMS. Error: " & http.Status & " - " & http.StatusText
+	End If
+	
+    ' Clean up
+	Set http = Nothing
+End Sub
+
+// PHP //
+function httpPost($url,$params)
+    {
+        $postData = '';
+        foreach($params as $k => $v) {
+            $postData .= $k . '='.$v.'&';
+        }
+        $postData = rtrim($postData, '&');
+
+        $ch = curl_init();
+        curl_setopt($ch,CURLOPT_URL,$url);
+        curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+        curl_setopt($ch,CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_POST, count($postData));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        $output = curl_exec($ch);
+        curl_close($ch);
+        return $output;
+    }
+
+    $url = "https://sym.notify92.com/api/quick/message";
+    $params = [
+        "user" => "username",
+        "password" => "password",
+        "mask" => "Notify92",
+        "to" => "923123456789",
+        "message" => "Your Message",
+    ];
+    httpPost($url,$params);
