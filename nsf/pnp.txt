@@ -1,0 +1,544 @@
+https://notesapplicationmigration.com/lotus-domino-encrypt-and-sign-all-nsf-in-domino-folder-lotus-script-agent/
+
+
+Upload complete folder structure with files to SharePoint Library – PNP PowerShell script
+This PNP power shell script will upload all files, folders and files in sub folders located in a directory on your PC to a SharePoint Library. The script will create the library and set the site home page to this library
+
+You will need to set the details in the script lines:
+
+154 – $logfile (make sure the folder exists)
+
+161 – $spBase
+
+162 – $spSiteURL
+
+194 – $authType, depending on the authentication method you choose define the authentication details in the lines 195 – 216
+
+220 – $siteOwner
+
+222 – $spSiteFolder
+
+224 – $sourceFolder
+
+
+==================
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+function UploadFile($destinationFolder, $sourceFile) {
+$sourceFileFull = $sourceFile.FullName
+if (!(Test-Path $sourceFileFull)){
+$script:filesULCount++
+Write-host "File not found, skipping $sourceFileFull" -ForegroundColor Yellow
+$logStr = "File not found, skipping " + $sourceFileFull | timestamp
+LogWrite $logStr
+return
+}
+
+#add file
+try { 
+$ceFolderRoot = "/" + $spSite + "/" + $spSiteFolder
+$ceFileEnd = $sourceFileFull.SubString($sourceFileFull.LastIndexOf('\')+1)
+if([string]::IsNullOrEmpty($destinationFolder.ServerRelativeUrl)){
+$ceFileURL = $ceFolderRoot + "/" + $ceFileEnd;
+} else {
+$ceFileURL = $destinationFolder.ServerRelativeUrl + "/" + $ceFileEnd;
+}
+if($chkTargetExists -eq "Yes") {
+if(fileExists($ceFileURL)) {
+Write-host "File exists, skipping $ceFileURL" -ForegroundColor Yellow
+return
+}
+}
+Write-host "Upload $sourceFileFull"
+$logStr = "Upload " + $sourceFileFull | timestamp
+LogWrite $logStr
+$retryUpload = 0
+while ($retryUpload -lt 10) {
+$retryUpload++
+$caIndex = 0
+$upload = Add-PnPFile -Path $sourceFileFull -Folder $destinationFolder 
+if($null -ne $upload) { 
+$context.Load($upload)
+ExecuteQueryWithIncrementalRetry -context $context -retryCount 5 -delay 150
+if($updateSPOnly -ne "Yes") {
+if($upload.CheckOutType -ne "none") {$upload.CheckIn("Checked in by Administrator", [Microsoft.SharePoint.Client.CheckinType]::MajorCheckIn)}
+$context.Load($upload)
+ExecuteQueryWithIncrementalRetry -context $context -retryCount 5 -delay 150
+}
+$script:filesUL++
+$script:filesULCount++
+Write-host "Uploaded $sourceFileFull" -ForegroundColor Green
+$logStr = "Uploaded " + $sourceFileFull | timestamp
+LogWrite $logStr
+$retryUpload = 101
+} else {
+Write-host "Retrying Upload $sourceFileFull" -ForegroundColor Yellow
+$logStr = "Retrying Upload " + $sourceFileFull | timestamp
+LogWrite $logStr
+}
+}
+if ($retryUpload -lt 100) {
+$script:errUL++
+Write-host "Error Upload $sourceFileFull, upload appears to have failed" -ForegroundColor Red
+$logStr = "Error Upload " + $sourceFileFull + ", upload appears to have failed" | timestamp
+LogWrite $logStr
+return
+}
+} catch {
+$script:errUL++
+$errorMessage = $_.Exception.Message
+$lineNumber = $_.InvocationInfo.ScriptLineNumber
+Write-host "Error on $sourceFileFull $errorMessage Error Line $lineNumber" -ForegroundColor Red
+$logStr = "Error on " + $sourceFileFull + " " + $errorMessage + " Error Line " + $lineNumber | timestamp
+LogWrite $logStr
+return
+}
+}
+function fileExists($ulFile) {
+try {
+$testFile = $context.web.GetFileByServerRelativeUrl($ulFile)
+$context.Load($testFile)
+$context.ExecuteQuery()
+return $True
+} catch {
+return $False
+}
+}
+
+function CreateFolder($listRootFolder, $folderRelativePath) {
+if($workingFolder){Remove-Variable workingFolder}
+$workingFolder = $listRootFolder
+$context.load($workingFolder)
+ExecuteQueryWithIncrementalRetry -context $context -retryCount 5 -delay 150
+$context.load($workingFolder.folders)
+ExecuteQueryWithIncrementalRetry -context $context -retryCount 5 -delay 150
+
+if($folderRelativePath.length -ge 1) {
+$pathChunks = $folderRelativePath.substring(1).split("\\")
+$fileSource = $sourceFolder + $folderRelativePath
+$pathChunks | ForEach-Object {
+$workingFolder = $workingFolder.folders.add($_)
+}
+$context.load($workingFolder)
+$context.load($workingFolder.folders)
+ExecuteQueryWithIncrementalRetry -context $context -retryCount 5 -delay 150
+}
+
+$filesInFolder = Get-ChildItem -Path $fileSource | ? {$_.psIsContainer -eq $False}
+$filesInFolder| ForEach-Object {
+UploadFile $workingFolder $_
+}
+}
+Function LogWrite {
+Param ([string]$logstring)
+Add-content -Encoding UTF8 $Logfile -value $logString
+}
+function ExecuteQueryWithIncrementalRetry([Microsoft.SharePoint.Client.ClientContext] $context, $retryCount, $delay) {
+if ($retryCount -eq $null) {$retryCount = 5}
+if ($retryCount -le 0) {$retryCount = 5}
+if ($delay -eq $null) {$delay = 500}
+if ($delay -le 0) {$delay = 5}
+$retryAttempts = 0
+$waitInterval = $delay
+while ($retryAttempts -lt $retryCount) {
+try {
+$context.ExecuteQuery()
+return
+}
+catch [System.Net.WebException] {
+$response = [System.Net.HttpWebResponse]$_.Exception.Response
+if ($response -ne $null -and ($response.StatusCode -eq 429 -or $response.StatusCode -eq 503)) {
+Write-Host "SharePoint request frequency exceeded. Sleeping for $waitInterval seconds then retrying." -foregroundcolor blue -backgroundcolor white
+$logStr = "SharePoint request frequency exceeded. Sleeping for " + $waitInterval + " seconds then retrying" | timestamp
+LogWrite $logStr
+Start-Sleep -s $waitInterval
+#add to retry count and increase delay
+$retryAttempts++
+$waitInterval = $waitInterval * 2
+} else {
+$script:errUL++
+Write-host "Error ExecuteQueryWithIncrementalRetry WebException -" [System.Net.HttpWebResponse]$_.Exception.Message -ForegroundColor Red
+$logStr = "Error ExecuteQueryWithIncrementalRetry WebException - " + [System.Net.HttpWebResponse]$_.Exception.Message | timestamp
+LogWrite $logStr
+throw
+}
+}
+catch {
+$script:errUL++
+Write-host "Error ExecuteQueryWithIncrementalRetry $_.Exception.Message" -ForegroundColor Red
+$logStr = "Error ExecuteQueryWithIncrementalRetry - " + $_.Exception.Message | timestamp
+LogWrite $logStr
+if(($maxErr -gt 0) -and ($errUL -ge $maxErr)){
+throw
+}
+}
+}
+throw New-Object Exception("Maximum retry attempts ($retryCount) has been attempted.")
+}
+filter timestamp {"$(Get-Date -Format G): $_"}
+$logfile = "E:\Logs\log.log"
+$logStr = "Start File Upload" | timestamp
+LogWrite $logStr
+$maxErr = 100
+$updateSPOnly = "No"
+$spSubSiteNames = ""
+$spType = "SITEPAGEPUBLISHING#0"
+$spBase = "https://company.sharepoint.com"
+$spSiteURL = "https://company.sharepoint.com/sites/LotusNotesIsGreat"
+$spTeamPos = $spSiteURL.LastIndexOf("/teams/")
+$spSitePos = $spSiteURL.LastIndexOf("/sites/")
+if (($spSitePos -ge 0) -or ($spTeamPos -ge 0)) {
+if ($spSitePos -ge 0) {
+$spSiteNames = $spSiteURL.SubString($spSitePos + 7) 
+} else {
+$spSiteNames = $spSiteURL.SubString($spTeamPos + 7) 
+}
+} else {
+$spSiteNames = $spSiteURL.SubString($spBase.length)
+}
+$spSiteNamesSlashPos = $spSiteNames.IndexOf("/") #first slash
+if ($spSiteNamesSlashPos -ge 0) { #has subsite/s
+$spSite = ""
+$subsiteNames = ""
+$subsiteSplit = $spSiteNames.split("/")
+$subsiteSplit | ForEach-Object {
+if ($spSite -eq "") {
+$spSite = $_
+} else {
+if ($subsiteNames -eq "") {
+$subsiteNames = $_
+} else {
+$subsiteNames = $subsiteNames + "!!" + $_
+}
+}
+}
+$spSiteURL = $spBase + $spSite 
+} else {
+$spSite = $spSiteNames
+}
+$authType = "UserPassword"
+if ($authType.ToLower() -eq "userpassword") { #username/pw
+$migrationUserName = "MrA@company.com"
+$migrationPassword = "letsrockandroll-fakepassword"
+$migrationSecurePassword = ConvertTo-SecureString -String $migrationPassword -AsPlainText -Force
+$migrationCred = New-Object -TypeName System.Management.Automation.PSCredential -argumentlist $migrationUserName, $migrationSecurePassword
+$pnpConnect = Connect-PnPOnline -Url $spBase -Credentials $migrationCred
+} elseif ($authType.ToLower() -eq "idsecret") { #client id/secret
+$migrationClientID = "{SPClientID}"
+$migrationClientSecret = "{SPClientSecret}"
+$pnpConnect = Connect-PnPOnline -Url $spBase -ClientId $migrationClientID -ClientSecret $migrationClientSecret -WarningAction Ignore
+} else { #pfx cert &amp; optional pw
+$pfxTenant = "{PFXTenant}"
+$pfxClientID = "{PFXClientID}"
+$pfxCertPath = "{PFXCertPath}"
+$pfxCertPassword = "{PFXCertPassword}"
+$pfxCertSecurePassword = ConvertTo-SecureString -String $pfxCertPassword -AsPlainText -Force
+if([string]::IsNullOrEmpty($pfxCertPassword)){
+$pnpConnect = Connect-PnPOnline -Url $spBase -ClientId $pfxClientID -CertificatePath $pfxCertPath -Tenant $pfxTenant -WarningAction Ignore
+} else {
+$pnpConnect = Connect-PnPOnline -Url $spBase -ClientId $pfxClientID -CertificatePath $pfxCertPath -CertificatePassword $pfxCertSecurePassword -Tenant $pfxTenant -WarningAction Ignore
+}
+}
+$context = Get-PnPContext
+$web = $context.Web
+$context.load($web)
+$siteOwner = "owner@company.com"
+$timeZone = "17" #17 is NZ, 4 for AMSTERDAM
+$spSiteFolder = "UploadLibrary"
+$spSiteAttFolder = "_files"
+$sourceFolder = "E:\ThefolderForUpload"
+$rcAD = "0"
+$chkTargetExists = "Yes"
+try {
+$checkSite = (Get-PnPTenantSite -Url $spSiteURL -ErrorAction SilentlyContinue).status
+}
+catch{}
+if ($checkSite -eq $null){
+$logStr = "Creating Site ""$spSite""." | timestamp
+LogWrite $logStr
+Write-Host "Creating SharePoint Site $spSiteURL"
+Write-Host "This might take a few minutes"
+Try{
+$newSite = New-PnPTenantSite -Title $spSite -Url $spSiteURL -Template $spType -Owner $siteOwner -StorageQuotaWarningLevel 62000 -StorageQuota 65000 -TimeZone $timeZone
+} catch {
+$script:errUL++
+Write-host "Error Creating Site $spSiteURL $_.Exception.Message" -foregroundcolor red -backgroundcolor white
+$logStr = "Error Creating Site " + $spSiteURL + " " + $_.Exception.Message | timestamp
+LogWrite $logStr
+exit
+}
+Start-sleep -s 5
+$siteCreationTimeoutMins = 30
+$siteCreationStart = get-date
+Try{
+$status = (Get-PnPTenantSite -Url $spSiteURL -ErrorAction SilentlyContinue).status
+} catch {}
+while ($status -ne 'Active') {
+$ts = New-timespan -start $siteCreationStart -End (get-date)
+If ($ts.Minutes -gt $siteCreationTimeoutMins) {
+Write-Host "Site couldn't be created within the allocated timespan, exiting." -foregroundcolor red -backgroundcolor white
+$logStr = "Site couldn't be created within the allocated timespan, exiting." | timestamp
+LogWrite $logStr
+exit
+}
+Start-sleep -s 5
+$status = ""
+try{
+$status = (Get-PnPTenantSite -Url $spSiteURL -ErrorAction SilentlyContinue).status
+} catch {}
+if([string]::IsNullOrEmpty($status)){$status="Creating"}
+Write-Host "Site Creation Status = $status"
+}
+Write-Host "Created SharePoint Site $spSiteURL"
+$logStr = "Created SharePoint Site $spSiteURL" | timestamp
+LogWrite $logStr
+Start-sleep -s 15 #seems delay required for site to initialize
+} else {
+Write-host "Site ""$spSiteURL"" exists."
+$logStr = "Site ""$spSiteURL"" exists." | timestamp
+LogWrite $logStr
+}
+$spSiteRoot = $spSite
+if ($authType.ToLower() -eq "userpassword") { #username/pw
+$pnpConnectNew = Connect-PnPOnline -Url $spSiteURL -Credentials $migrationCred #reconnect to site
+} elseif ($authType.ToLower() -eq "idsecret") { #client id/secret
+$pnpConnectNew = Connect-PnPOnline -Url $spSiteURL -ClientId $migrationClientID -ClientSecret $migrationClientSecret -WarningAction Ignore
+} else { #pfx cert
+if([string]::IsNullOrEmpty($pfxCertPassword)){
+$pnpConnectNew = Connect-PnPOnline -Url $spSiteURL -ClientId $pfxClientID -CertificatePath $pfxCertPath -Tenant $pfxTenant -WarningAction Ignore
+} else {
+$pnpConnectNew = Connect-PnPOnline -Url $spSiteURL -ClientId $pfxClientID -CertificatePath $pfxCertPath -CertificatePassword $pfxCertSecurePassword -Tenant $pfxTenant -WarningAction Ignore
+}
+}
+$context = Get-PnPContext
+$allowScriptChk = 0
+$spTarget = Get-PnPTenantSite -url $spSiteURL -Detailed
+$scriptStatus = $spTarget.DenyAddAndCustomizePages
+while ($scriptStatus -eq "Enabled") {
+try {
+$allowScriptChk++
+if($allowScriptChk -ge 11){break}
+Set-PnpTenantSite -Identity $spSiteURL -DenyAddAndCustomizePages:$false
+Write-host "Set Site DenyAddAndCustomizePages to false"
+$logStr = "Set Site DenyAddAndCustomizePages to false" | timestamp
+LogWrite $logStr
+$spTarget = Get-PnPTenantSite -url $spSiteURL -Detailed
+$scriptStatus = $spTarget.DenyAddAndCustomizePages
+Start-sleep -s 1 #add slight delay
+} catch {
+$script:errUL++
+Write-host "Error setting DenyAddAndCustomizePages in Site $spSiteURL $_.Exception.Message" -foregroundcolor red
+$logStr = "Error setting DenyAddAndCustomizePages in Site $spSiteURL - " + $_.Exception.Message | timestamp
+LogWrite $logStr
+}
+}
+if(-not [string]::IsNullOrEmpty($subsiteNames)){ #subsite/s required
+$spSubSiteURL = $spSiteURL
+$subwebs = Get-PnPSubWeb -Recurse | Select Title, Url
+$subsiteArray = $subsiteNames.Split("!!")
+foreach ($spSubSite in $subsiteArray) {
+if($spSubSite -ne ""){
+$spSubSiteHost = $spSubSiteURL #site/subsite hosting the subsite
+$spSubSiteURL = $spSubSiteURL + "/" + $spSubSite
+$spSubSiteExists = "0"
+foreach ($subweb in $subwebs) {
+if ($authType.ToLower() -eq "userpassword") { #username/pw
+$pnpConnect = Connect-PnPOnline -Url $subweb.Url -Credentials $migrationCred
+} elseif ($authType.ToLower() -eq "idsecret") { #client id/secret
+$pnpConnect = Connect-PnPOnline -Url $subweb.Url -ClientId $migrationClientID -ClientSecret $migrationClientSecret -WarningAction Ignore
+} else { #pfx cert
+if([string]::IsNullOrEmpty($pfxCertPassword)){
+$pnpConnect = Connect-PnPOnline -Url $subweb.Url -ClientId $pfxClientID -CertificatePath $pfxCertPath -Tenant $pfxTenant -WarningAction Ignore
+} else {
+$pnpConnect = Connect-PnPOnline -Url $subweb.Url -ClientId $pfxClientID -CertificatePath $pfxCertPath -CertificatePassword $pfxCertSecurePassword -Tenant $pfxTenant -WarningAction Ignore
+}
+}
+if ($subweb.Url -eq $spSubSiteURL){
+$spSubSiteExists = "1"
+}
+}
+$spSiteRoot = $spSiteRoot + "/" + $spSubSite
+if ($spSubSiteExists -eq "1"){
+Write-host "SubSite ""$spSubSite"" exists."
+$logStr = "SubSite $spSubSite exists." | timestamp
+LogWrite $logStr
+} else {
+Write-host "Creating SubSite ""$spSubSite""."
+$logStr = "Creating SubSite $spSubSite." | timestamp
+LogWrite $logStr
+Write-host "Connect to host ""$spSubSiteHost""."
+if ($authType.ToLower() -eq "userpassword") { #username/pw
+$pnpConnect = Connect-PnPOnline -Url $spSubSiteHost -Credentials $migrationCred #connect to host subsite
+} elseif ($authType.ToLower() -eq "idsecret") { #client id/secret
+$pnpConnect = Connect-PnPOnline -Url $spSubSiteHost -ClientId $migrationClientID -ClientSecret $migrationClientSecret -WarningAction Ignore
+} else { #pfx cert
+if([string]::IsNullOrEmpty($pfxCertPassword)){
+$pnpConnect = Connect-PnPOnline -Url $spSubSiteHost -ClientId $pfxClientID -CertificatePath $pfxCertPath -Tenant $pfxTenant -WarningAction Ignore
+} else {
+$pnpConnect = Connect-PnPOnline -Url $spSubSiteHost -ClientId $pfxClientID -CertificatePath $pfxCertPath -CertificatePassword $pfxCertSecurePassword -Tenant $pfxTenant -WarningAction Ignore
+}
+}
+Start-sleep -s 10
+Try{
+New-PnPWeb -Title $spSubSite -Url $spSubSite -Template $spType
+} catch {
+$script:errUL++
+Write-host "Error Creating SubSite $spSubSite $_.Exception.Message" -foregroundcolor red -backgroundcolor white
+$logStr = "Error Creating SubSite " + $spSubSite + " " + $_.Exception.Message | timestamp
+LogWrite $logStr
+exit
+}
+$spSubSiteCreated = "0"
+$siteCreationTimeoutMins = 10
+$siteCreationStart = get-date
+while ($spSubSiteCreated -ne "1") {
+$ts = New-timespan -start $siteCreationStart -End (get-date)
+If ($ts.Minutes -gt $siteCreationTimeoutMins) {
+Write-Host "Subsite couldn't be created within the allocated timespan, exiting." -foregroundcolor red -backgroundcolor white
+$logStr = "Subsite couldn't be created within the allocated timespan, exiting." | timestamp
+LogWrite $logStr
+exit
+}
+Start-sleep -s 5
+$subwebs = Get-PnPSubWeb -Recurse | Select Title, Url
+foreach ($subweb in $subwebs) {
+if ($subweb.Url -eq $spSubSiteURL){
+$spSubSiteCreated = "1"
+}
+}
+}
+Start-sleep -s 5
+Write-Host "Created SharePoint Subsite $spSubSiteURL"
+$logStr = "Created SharePoint Subsite $spSubSiteURL" | timestamp
+LogWrite $logStr
+$spTarget = Get-PnPTenantSite -url $spSubSite -Detailed
+$scriptStatus = $spTarget.DenyAddAndCustomizePages
+if($scriptStatus -eq "Enabled"){
+try {
+Set-PnpTenantSite -Identity $spSubSiteURL -DenyAddAndCustomizePages:$false
+Write-host "Set Subsite DenyAddAndCustomizePages to false"
+$logStr = "Set Subsite DenyAddAndCustomizePages to false" | timestamp
+LogWrite $logStr
+} catch {
+$script:errUL++
+Write-host "Error setting DenyAddAndCustomizePages in Subsite $spSubSiteURL $_.Exception.Message" -foregroundcolor red
+$logStr = "Error setting DenyAddAndCustomizePages in Subsite $spSubSiteURL - " + $_.Exception.Message | timestamp
+LogWrite $logStr
+}
+}
+}
+}
+}
+#Write-host "Connect to ""$spSubSiteURL ""."
+if ($authType.ToLower() -eq "userpassword") { #username/pw
+$pnpConnect = Connect-PnPOnline -Url $spSubSiteURL -Credentials $migrationCred #connect to latest subsite
+} elseif ($authType.ToLower() -eq "idsecret") { #client id/secret
+$pnpConnect = Connect-PnPOnline -Url $spSubSiteURL -ClientId $migrationClientID -ClientSecret $migrationClientSecret -WarningAction Ignore
+} else { #pfx cert
+if([string]::IsNullOrEmpty($pfxCertPassword)){
+$pnpConnect = Connect-PnPOnline -Url $spSubSiteURL -ClientId $pfxClientID -CertificatePath $pfxCertPath -Tenant $pfxTenant -WarningAction Ignore
+} else {
+$pnpConnect = Connect-PnPOnline -Url $spSubSiteURL -ClientId $pfxClientID -CertificatePath $pfxCertPath -CertificatePassword $pfxCertSecurePassword -Tenant $pfxTenant -WarningAction Ignore
+}
+}
+Start-sleep -s 5
+}
+$context = Get-PnPContext
+$web = $context.Web
+$context.load($web)
+$lists = $web.Lists
+$context.load($lists)
+ExecuteQueryWithIncrementalRetry -context $context -retryCount 5 -delay 150
+$errUL = 0
+$filesUL = 0
+$filesULCount = 0
+$createLib = "no"
+$recreateLibKey = ""
+$attFileArray = [System.Collections.ArrayList]@()
+$testList = $lists | where{$_.Title -eq $spSiteFolder}
+if($testList) {
+Write-host "Library ""$spSiteFolder"" exists."
+$logStr = "Library """ + $spSiteFolder + """ exists" | timestamp
+LogWrite $logStr
+$targetList = Get-PnPList -Identity $spSiteFolder
+$context.Load($targetList)
+ExecuteQueryWithIncrementalRetry -context $context -retryCount 5 -delay 150 
+} else {
+$createLib = "yes" 
+}
+if ($createLib -eq "yes") {
+Write-host "Creating Library ""$spSiteFolder""."
+$logStr = "Creating Library """ + $spSiteFolder + """" | timestamp
+LogWrite $logStr
+try{
+$targetList = New-PnPList -Title $spSiteFolder -Template DocumentLibrary
+Write-host "Created Library ""$spSiteFolder""."
+$logStr = "Created Library """ + $spSiteFolder + """" | timestamp
+LogWrite $logStr
+Start-sleep -s 5
+} catch {
+$script:errUL++
+Write-host "Error Creating Library $spSiteFolder $_.Exception.Message" -foregroundcolor red -backgroundcolor white
+$logStr = "Error Creating Library " + $spSiteFolder + " " + $_.Exception.Message | timestamp
+LogWrite $logStr
+exit
+}
+}
+try{
+$targetList = Get-PnPList -Identity $spSiteFolder
+} catch {}
+$hpChk = 0
+$hpURLType = "lib"
+if($hpURLType -ne ""){
+$hpURL = Get-PnPHomePage
+$hpURLReq = "" #get in try block as below
+while ($hpURL -ne $hpURLReq) {
+try{
+$hpChk++
+if($hpChk -ge 11){break}
+$targetList = Get-PnPList -Identity $spSiteFolder
+if($null -ne $targetList) {
+if($null -ne $targetList.RootFolder) {
+$hpURLTmp = $targetList.RootFolder.ServerRelativeUrl
+if ($hpURLTmp -ne "") {
+$hpURLRel = $hpURLTmp.SubString($hpURLTmp.LastIndexOf("/")+1)
+if($hpURLType -eq "lib"){
+$hpURLReq = $hpURLRel + "/Forms/AllItems.aspx"
+} else {
+$hpURLReq = $hpURLRel + "/" + $hpURLType
+}
+Set-PnPHomePage -RootFolderRelativeUrl $hpURLReq
+Write-host "Set Site Homepage to $hpURLReq"
+$logStr = "Set Site Homepage to $hpURLReq" | timestamp
+LogWrite $logStr
+$hpURL = Get-PnPHomePage
+}
+}
+}
+Start-sleep -s 1 #add slight delay
+} catch {
+$script:errUL++
+$errorMessage = $_.Exception.Message
+$lineNumber = $_.InvocationInfo.ScriptLineNumber
+Write-host "Error setting Site Homepage to $hpURLReq $errorMessage Error Line $lineNumber" -foregroundcolor red
+$logStr = "Error setting Site Homepage to " + $hpURLReq + " " + $errorMessage + " Error Line " + $lineNumber | timestamp
+LogWrite $logStr
+}
+}
+}
+
+
+$filesUL = 0
+$allFolders = Get-ChildItem -Recurse -Path $sourceFolder |? {$_.psIsContainer -eq $True}
+$filesInRoot = Get-ChildItem -Path $sourceFolder | ? {$_.psIsContainer -eq $False}
+$filesInRoot| ForEach-Object {
+UploadFile($targetList.RootFolder) $_
+}
+$allFolders| ForEach-Object {
+$folderRelativePath = ($_.FullName).Substring($sourceFolder.Length)
+CreateFolder ($targetList.RootFolder) $folderRelativePath
+}
+Write-host "Uploaded $filesUL files" -foregroundcolor black -backgroundcolor yellow
+$logStr = "Uploaded $filesUL files" | timestamp
+LogWrite $logStr
+$logStr = "End File Upload" | timestamp
+LogWrite $logStr
