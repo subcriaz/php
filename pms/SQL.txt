@@ -1,0 +1,314 @@
+Option Public
+
+
+
+Sub Initialize()
+	
+	Dim s As New NotesSession
+	Dim db As NotesDatabase
+	Set db=s.Currentdatabase
+	
+	Dim view As NotesView
+	Set view = db.getview("Plotappall")
+
+	Dim doc As NotesDocument
+
+	Set doc = view.getfirstdocument
+
+Dim cntr As Double
+cntr = 0
+
+' existing excel
+	'Print "Connecting to Excel..."
+	Set xlApp = CreateObject( "Excel.Application" )
+	ExcelFileName =  "D:\php123\gitroot\php\pms\Flds.xlsx"           ' uidoc.FieldGetText("SourceExcel") '  "D:\Riaz\Balloting-March 2023\Balloting-29 Mar 23\Riaz-29Mar23\puch hsitory.xlsx"
+	xlApp.Workbooks.Open ExcelFileName
+	' '' ' Excel.Workbooks.Open xlFilename(0) 'Open the Excel file
+	Set oWorkbook = xlApp.ActiveWorkbook
+	Set xlSheet1 = oWorkbook.ActiveSheet
+	xlApp.Visible = True  ' False 'Don't display the Excel window
+Row = 2
+	col = 2
+	
+	Dim fldname As String
+	
+	
+	
+	While Not doc Is Nothing 
+		
+		fldname =Trim(CStr(xlApp.cells(row, 2).value)) 
+		'MsgBox fldname  
+		'MsgBox doc.Getitemvalue(fldname)  
+		'Exit Sub
+				
+		While Not fldname =""		
+			xlApp.cells (row,col+1) =  {'}&doc.Getitemvalue(fldname)(0) & {'}
+			row = row+1
+			fldname =Trim(CStr(xlApp.cells(row, 2).value)) 
+		Wend
+		'ForAll itm In doc.Items
+		'	xlApp.cells (row,czol) =  Trim(itm.Name)
+		'	Row = Row + 1
+		'End ForAll
+		
+	
+	cntr = cntr +1
+	If cntr > 0 Then GoTo end1
+	
+	Set doc = view.getnextdocument(doc)
+Wend
+
+end1:
+	MsgBox "Agent Processed " & counter & " record(s)"
+
+	Exit Sub
+
+	
+	
+	
+End Sub
+
+=========
+
+Option Public
+
+
+
+Sub Initialize()
+	
+	Dim s As New NotesSession
+	Dim db As NotesDatabase
+	Set db=s.Currentdatabase
+	
+	Dim view As NotesView
+	Set view = db.getview("Plotappall")
+
+	Dim doc As NotesDocument
+
+	Set doc = view.getfirstdocument
+	Set doc = view.getnextdocument(doc)
+	Dim cntr As Double
+cntr = 0
+
+' existing excel
+	'Print "Connecting to Excel..."
+	Set xlApp = CreateObject( "Excel.Application" )
+	ExcelFileName =  "D:\php123\gitroot\php\pms\Flds.xlsx"          ' uidoc.FieldGetText("SourceExcel") '  "D:\Riaz\Balloting-March 2023\Balloting-29 Mar 23\Riaz-29Mar23\puch hsitory.xlsx"
+	xlApp.Workbooks.Open ExcelFileName
+	' '' ' Excel.Workbooks.Open xlFilename(0) 'Open the Excel file
+	Set oWorkbook = xlApp.ActiveWorkbook
+	Set xlSheet1 = oWorkbook.ActiveSheet
+	xlApp.Visible = True  ' False 'Don't display the Excel window
+	Dim tary As Variant
+	
+Row = 2
+	col = 2
+	While Not doc Is Nothing 
+		
+		ForAll itm In doc.Items
+			xlApp.cells (row,col) =  Trim(itm.Name)
+			xlApp.cells (row,col+1) =  Trim(itm.Type)
+			tary =  itm.values
+			xlApp.cells (row,col+2) = tary 'itm.values 'doc.Getitemvalue( itm.Name)(0)
+			
+			Row = Row + 1
+		End ForAll
+		
+	
+	cntr = cntr +1
+	If cntr > 0 Then Exit Sub
+	
+	Set doc = view.getnextdocument(doc)
+Wend
+	MsgBox "Agent Processed " & counter & " record(s)"
+
+	Exit Sub
+
+	
+	
+	
+End Sub
+=========
+
+Option Public
+
+
+
+Sub Initialize()
+	
+	Dim s As New NotesSession
+	Dim db As NotesDatabase
+	Set db=s.Currentdatabase
+	
+	Dim view As NotesView
+	Set view = db.getview("Plotappall")
+
+	Dim doc As NotesDocument
+
+	Set doc = view.getfirstdocument
+
+Dim cntr As Double
+cntr = 0
+
+' existing excel
+	'Print "Connecting to Excel..."
+	Set xlApp = CreateObject( "Excel.Application" )
+	ExcelFileName =  "D:\php123\gitroot\php\pms\Flds.xlsx"          ' uidoc.FieldGetText("SourceExcel") '  "D:\Riaz\Balloting-March 2023\Balloting-29 Mar 23\Riaz-29Mar23\puch hsitory.xlsx"
+	xlApp.Workbooks.Open ExcelFileName
+	' '' ' Excel.Workbooks.Open xlFilename(0) 'Open the Excel file
+	Set oWorkbook = xlApp.ActiveWorkbook
+	Set xlSheet1 = oWorkbook.ActiveSheet
+	xlApp.Visible = True  ' False 'Don't display the Excel window
+	Dim tary As Variant
+	
+Row = 2
+	col = 2
+	While Not doc Is Nothing 
+		
+		ForAll itm In doc.Items
+			xlApp.cells (row,col) =  Trim(itm.Name)
+			xlApp.cells (row,col+1) =  Trim(itm.Type)
+			tary =  itm.values
+			xlApp.cells (row,col+2) = tary 'itm.values 'doc.Getitemvalue( itm.Name)(0)
+			
+			Row = Row + 1
+		End ForAll
+		
+	
+	cntr = cntr +1
+	If cntr > 0 Then Exit Sub
+	
+	Set doc = view.getnextdocument(doc)
+Wend
+	MsgBox "Agent Processed " & counter & " record(s)"
+
+	Exit Sub
+
+	
+	
+	
+End Sub
+
+===========
+Sub Initialize()
+	
+	Dim s As New NotesSession
+	Dim db As NotesDatabase
+	Set db=s.Currentdatabase
+	
+	Dim view As NotesView
+	Set view = db.getview("Plotappall")
+
+	Dim doc As NotesDocument
+
+	Set doc = view.getfirstdocument
+
+Dim cntr As Double
+cntr = 0
+
+' existing excel
+	'Print "Connecting to Excel..."
+	Set xlApp = CreateObject( "Excel.Application" )
+	ExcelFileName =  "D:\Riaz\Flds.xlsx"           ' uidoc.FieldGetText("SourceExcel") '  "D:\Riaz\Balloting-March 2023\Balloting-29 Mar 23\Riaz-29Mar23\puch hsitory.xlsx"
+	xlApp.Workbooks.Open ExcelFileName
+	' '' ' Excel.Workbooks.Open xlFilename(0) 'Open the Excel file
+	Set oWorkbook = xlApp.ActiveWorkbook
+	Set xlSheet1 = oWorkbook.ActiveSheet
+	xlApp.Visible = True  ' False 'Don't display the Excel window
+Row = 2
+	col = 2
+	While Not doc Is Nothing 
+		
+		ForAll itm In doc.Items
+			xlApp.cells (row,col) =  Trim(itm.Name)
+			Row = Row + 1
+		End ForAll
+		
+	
+	cntr = cntr +1
+	If cntr > 20 Then Exit Sub
+	
+	Set doc = view.getnextdocument(doc)
+Wend
+	MsgBox "Agent Processed " & counter & " record(s)"
+
+	Exit Sub
+
+	
+	
+	
+End Sub
+
+
+=C7& "`"& B8 & "`  Text DEFAULT NULL, "
+
+
+Option Public
+
+
+
+Sub Initialize()
+	
+	Dim s As New NotesSession
+	Dim db As NotesDatabase
+	Set db=s.Currentdatabase
+	
+	Dim view As NotesView
+	Set view = db.getview("Plotappall")
+
+	Dim doc As NotesDocument
+
+	Set doc = view.getfirstdocument
+
+Dim cntr As Double
+cntr = 0
+
+' existing excel
+	'Print "Connecting to Excel..."
+	Set xlApp = CreateObject( "Excel.Application" )
+	ExcelFileName =  "D:\php123\gitroot\php\pms\Flds.xlsx"           ' uidoc.FieldGetText("SourceExcel") '  "D:\Riaz\Balloting-March 2023\Balloting-29 Mar 23\Riaz-29Mar23\puch hsitory.xlsx"
+	xlApp.Workbooks.Open ExcelFileName
+	' '' ' Excel.Workbooks.Open xlFilename(0) 'Open the Excel file
+	Set oWorkbook = xlApp.ActiveWorkbook
+	Set xlSheet1 = oWorkbook.ActiveSheet
+	xlApp.Visible = True  ' False 'Don't display the Excel window
+Row = 2
+	col = 2
+	
+	Dim fldname As String
+	
+	
+	
+	While Not doc Is Nothing 
+		
+		fldname =Trim(CStr(xlApp.cells(row, 2).value)) 
+		'MsgBox fldname  
+		'MsgBox doc.Getitemvalue(fldname)  
+		'Exit Sub
+				
+		While Not fldname =""		
+			xlApp.cells (row,col+1) =  {'}&doc.Getitemvalue(fldname)(0) & {'}
+			row = row+1
+			fldname =Trim(CStr(xlApp.cells(row, 2).value)) 
+		Wend
+		'ForAll itm In doc.Items
+		'	xlApp.cells (row,czol) =  Trim(itm.Name)
+		'	Row = Row + 1
+		'End ForAll
+		
+	
+	cntr = cntr +1
+	If cntr > 0 Then GoTo end1
+	
+	Set doc = view.getnextdocument(doc)
+Wend
+
+end1:
+	MsgBox "Agent Processed " & counter & " record(s)"
+
+	Exit Sub
+
+	
+	
+	
+End Sub

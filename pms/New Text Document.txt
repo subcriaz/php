@@ -1,0 +1,51 @@
+Sub Initialize()
+	
+	Dim s As New NotesSession
+	Dim db As NotesDatabase
+	Set db=s.Currentdatabase
+	
+	Dim view As NotesView
+	Set view = db.getview("Plotappall")
+
+	Dim doc As NotesDocument
+
+	Set doc = view.getfirstdocument
+
+Dim cntr As Double
+cntr = 0
+
+' existing excel
+	'Print "Connecting to Excel..."
+	Set xlApp = CreateObject( "Excel.Application" )
+	ExcelFileName =  "D:\Riaz\Flds.xlsx"           ' uidoc.FieldGetText("SourceExcel") '  "D:\Riaz\Balloting-March 2023\Balloting-29 Mar 23\Riaz-29Mar23\puch hsitory.xlsx"
+	xlApp.Workbooks.Open ExcelFileName
+	' '' ' Excel.Workbooks.Open xlFilename(0) 'Open the Excel file
+	Set oWorkbook = xlApp.ActiveWorkbook
+	Set xlSheet1 = oWorkbook.ActiveSheet
+	xlApp.Visible = True  ' False 'Don't display the Excel window
+Row = 2
+	col = 2
+	While Not doc Is Nothing 
+		
+		ForAll itm In doc.Items
+			xlApp.cells (row,col) =  Trim(itm.Name)
+			Row = Row + 1
+		End ForAll
+		
+	
+	cntr = cntr +1
+	If cntr > 20 Then Exit Sub
+	
+	Set doc = view.getnextdocument(doc)
+Wend
+	MsgBox "Agent Processed " & counter & " record(s)"
+
+	Exit Sub
+
+	
+	
+	
+End Sub
+
+
+=C7& "`"& B8 & "`  Text DEFAULT NULL, "
