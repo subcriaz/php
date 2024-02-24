@@ -1,0 +1,48 @@
+In Laravel, the Query Builder provides a convenient and fluent way to perform joins between tables in your database queries. Here's how you can use Laravel Query Builder to join tables:
+
+Basic Join:
+==============
+$result = DB::table('users')
+            ->join('posts', 'users.id', '=', 'posts.user_id')
+            ->select('users.*', 'posts.title', 'posts.body')
+            ->get();
+This example demonstrates a basic inner join between the users and posts tables on the id column of users and the user_id column of posts. The select() method specifies which columns you want to retrieve.
+
+Left Join:
+===========
+$result = DB::table('users')
+            ->leftJoin('posts', 'users.id', '=', 'posts.user_id')
+            ->select('users.*', 'posts.title', 'posts.body')
+            ->get();
+This performs a left join, where all records from the users table are returned, along with any matching records from the posts table. If there are no matching records in posts, NULL values are returned for posts.title and posts.body.
+
+Multiple Joins:
+================
+$result = DB::table('users')
+            ->join('contacts', 'users.id', '=', 'contacts.user_id')
+            ->join('orders', 'users.id', '=', 'orders.user_id')
+            ->select('users.*', 'contacts.phone', 'orders.order_id')
+            ->get();
+You can join multiple tables in a single query by chaining multiple join() methods.
+
+Custom Join Conditions:
+========================
+$result = DB::table('users')
+            ->join('posts', function ($join) {
+                $join->on('users.id', '=', 'posts.user_id')
+                     ->where('posts.is_published', true);
+            })
+            ->get();
+You can also specify custom join conditions using a closure within the join() method. In this example, the join only includes rows from the posts table where the is_published column is true.
+
+These are some basic examples of how to perform table joins using Laravel's Query Builder. Depending on your specific requirements, you can adjust the join type, conditions, and selected columns accordingly.
+
+
+Laravel Query Builder:
+PHP - PDO is a PHP extension
+Laravel's Eloquent ORM is built on top of 
+
+and provides even higher-level abstraction for database interactions, 
+
+allowing you to work with database records as objects.
+
