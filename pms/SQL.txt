@@ -1,3 +1,29 @@
+
+create table  `members` (
+    id MEDIUMINT NOT NULL AUTO_INCREMENT,
+    `App_FatHus_Name`  Text DEFAULT NULL, `App_Name`  Text DEFAULT NULL, `App_NIC_No`  Text DEFAULT NULL, `App_Present_Address`  Text DEFAULT NULL, `AutoNumber`  Text DEFAULT NULL, `Batch`  Text DEFAULT NULL, `BOOKING_FORM_NUMBER`  Text DEFAULT NULL, `CreatorName`  Text DEFAULT NULL, `EmailAddress`  Text DEFAULT NULL, `Form`  Text DEFAULT NULL, `MobileNo`  Text DEFAULT NULL, `OutStanding`  Text DEFAULT NULL, `Phase`  Text DEFAULT NULL, `Pref_Size`  Text DEFAULT NULL, `Pref_Type`  Text DEFAULT NULL, `Prefix`  Text DEFAULT NULL, `Reg_No`  Text DEFAULT NULL, `RELATION`  Text DEFAULT NULL,
+    
+
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
+updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  
+    
+    
+PRIMARY KEY (id)
+
+
+)
+=====================
+insert into  `members` (
+    App_FatHus_Name,App_Name,App_NIC_No,App_Present_Address,AutoNumber,Batch,BOOKING_FORM_NUMBER,CreatorName,EmailAddress,Form,MobileNo,OutStanding,Phase,Pref_Size,Pref_Type,Prefix,Reg_No,RELATION
+
+)
+values(
+'Tariq Saeed' ,'Mrs.Farhat Jabeen' ,'38401-0280162-6' ,'House No. 12, Lane No.4, Sector G, DHA Phase-2, Islamabad' ,'00014' ,'20-M' ,'61-01-5010' ,'Auto Created' ,'rafaytariq94@gmail.com' ,'NPA1' ,'0321-5334982' ,'0' ,'Qurtaba City' ,'20-M' ,'Residential' ,'QC-' ,'QC-00014' ,'W/O' 
+
+)
+
+
+==========
 Option Public
 
 
