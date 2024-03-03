@@ -1,0 +1,123 @@
+Sub Click(Source As Button)
+	'Msgbox {dsfsefsgreger},64,{msg}
+	
+	On Error Goto errHandler
+	
+	
+	
+	' /////////////// Text file ////////////////////////////
+	
+	fileName1$ = {C:\Users\admarshad_prod\Documents\emails.txt}
+	fileName1$   = Inputbox$("file name  ? ")
+	fileName1$   = fileName1$ & {\emails.txt}
+	
+	Msgbox  {A text file [ } &  fileName1$   &  { ] will be created , make sure you have this folder}  , 64  , {Msg}
+	fileNum1% = Freefile()
+	Open fileName1$ For Output As fileNum1%
+	
+	' /////////////// End Text file ////////////////////////////
+	
+	Dim s As New NotesSession
+	Dim db As NotesDatabase
+	Dim nab As NotesDatabase
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim maildb As notesdatabase
+	Dim mailview As NotesView
+	Dim maildoc As NotesDocument
+	Dim dbServer As String
+	Dim mailFile As String
+	
+	Set db = s.CurrentDatabase
+	
+	dbServer = s.CurrentDatabase.Server
+	
+	Set nab = s.GetDatabase ( dbServer   , {names.nsf} ) 
+	Set nabview = nab.GetView({People})
+	Set nabdoc  = nabview.GetFirstDocument
+	
+	' Print Header Row 
+	Write #fileNum1%,  {Sr.No} 	& {###} &  {Mailbox} 	& {###}  &  {EmailAddress} 	& {###}  &  {Folder} & {###} &  {EmailCreationDate} & {###} &   {From}  & {###} &  {Subject} & {###} & {To}  & {###} &    {CopyTo}   & {###} & {ToAll}  & {###}  &  {CopyToAll} 
+	
+	
+	mcounter = 1
+	While Not nabdoc Is Nothing
+		
+		
+		' get object of maildb -- NSF 
+		'Print nabdoc.MailFile(0) 
+		mailFile  = nabdoc.MailFile(0)
+		Print  {#  } mcounter & {    } & mailFile
+		If  mailFile  =""  Or Trim(nabdoc.MailServer(0) ) = "" Then
+			Print   nabdoc.FullName(0)   & {  mailFile or server name is missing in address book}
+			Write #fileNum1%,  {#  } & mcounter & {    } &     nabdoc.FullName(0)  &  {  }  & mailFile &  {  mailFile name or server name  is missing in Address book}
+			Goto nextnabdoc
+		End If
+		EmaiAdd = Trim(nabdoc.InternetAddress(0))
+		
+		If  EmaiAdd = "" Then EmaiAdd ="-"
+		'  nabdoc.MailServer(0)
+		Set maildb = s.GetDatabase (  nabdoc.MailServer(0)  ,   nabdoc.MailFile(0) )  ' 60
+		'If  maildb Is Nothing Then 			
+		'	Write #fileNum1%,   {No Access  on Mailbox  } & {###}  &  nabdoc.FullName(0)  &   {  < - > } &  nabdoc.MailFile(0)
+		'	Goto nextnabdoc
+		'End If		
+		Set mailview = maildb.GetView ({($All)})
+		
+		' //////////     get last row of the email view '' last is latest
+		Set maildoc = mailview.GetLastDocument
+		
+		
+		row = 0
+		While Not maildoc Is Nothing 
+			row = row +1
+			sto =   maildoc.SendTo(0)  
+			ccto =   maildoc.CopyTo(0) 
+			subj =    maildoc.Subject(0) 
+			jtoall = Trim(Join(maildoc.SendTo , "~") )
+			cctoall = Trim(Join(maildoc.CopyTo , "~") )
+				'Msgbox  cctoall
+			
+			If Trim( sto ) =  "" Then 	sto   =   {-}
+			If Trim( ccto  ) = "" Then 	ccto =   {-}
+			If Trim( subj) = "" Then 	subj =    {-} 
+			If Trim( jtoall  ) = "" Then 	jtoall  =    {-} 
+			If Trim( cctoall  ) = "" Then 	cctoall  =    {-} 
+			
+			Write #fileNum1%,  Cstr(mcounter)  & {###} & mailFile  & {###} &   EmaiAdd  & {###} &  {All} & {###} &  maildoc.created & {###} &   maildoc.From(0) & {###} &   subj & {###} &  sto  & {###} &  ccto  & {###} &  jtoall  & {###}  &  cctoall            
+			
+			If row > 2 Then Goto nextnabdoc
+			Set maildoc = mailview.GetPrevDocument(maildoc)
+		Wend
+		'Msgbox "2"	
+		'''''''''''''End If ' /// TO be commented 
+		
+		
+nextnabdoc:
+		
+		mcounter = mcounter + 1
+		
+		Set nabdoc = nabview.getnextdocument(nabdoc)
+	Wend
+	
+	
+	
+	Goto mdone
+	Exit Sub
+	
+errHandler :
+	Print {An Error occured at line number : } & Erl()	 & {  and the Error  : } & Error	
+	If Erl() = 60 Then
+		Write #fileNum1%,   {No Access  on Mailbox  } & {###}     & nabdoc.FullName(0)  &   {  < - >  Server } &    nabdoc.MailServer(0) & { file }  & nabdoc.MailFile(0)
+		Goto nextnabdoc
+	End If
+	Exit Sub
+	
+mdone:	
+	
+	Msgbox  "done " , 64  , {Msg}
+	Close fileNum1%
+	Print { text file  close  }
+	Exit Sub
+	
+End Sub
