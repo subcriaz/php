@@ -1,1 +1,60 @@
 https://www.youtube.com/watch?v=q8tZQxT4YPU
+
+
+Option Public
+Option Declare
+
+Const ONES(9) As String = { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" }
+Const TEENS(9) As String = { "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen" }
+Const TENS(9) As String = { "", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety" }
+Const THOUSANDS(3) As String = { "thousand", "million", "billion", "trillion" }
+
+Function ConvertNumberToWords(number As Long) As String
+    If number = 0 Then
+        ConvertNumberToWords = "zero"
+    Else
+        ConvertNumberToWords = ConvertNumberPartToWords(number)
+    End If
+End Function
+
+Function ConvertNumberPartToWords(number As Long) As String
+    Dim words As String
+    Dim remainder As Long
+
+    If number < 10 Then
+        words = ONES(number)
+    ElseIf number < 20 Then
+        words = TEENS(number - 10)
+    ElseIf number < 100 Then
+        words = TENS(number \ 10)
+        remainder = number Mod 10
+        If remainder > 0 Then
+            words = words & "-" & ONES(remainder)
+        End If
+    ElseIf number < 1000 Then
+        words = ONES(number \ 100) & " hundred"
+        remainder = number Mod 100
+        If remainder > 0 Then
+            words = words & " and " & ConvertNumberPartToWords(remainder)
+        End If
+    Else
+        For i = 0 To Ubound(THOUSANDS)
+            If number < 1000^(i + 1) Then
+                words = ConvertNumberPartToWords(number \ 1000^i) & " " & THOUSANDS(i)
+                remainder = number Mod 1000^i
+                If remainder > 0 Then
+                    words = words & ", " & ConvertNumberPartToWords(remainder)
+                End If
+                Exit For
+            End If
+        Next
+    End If
+
+    ConvertNumberPartToWords = words
+End Function
+
+Sub Initialize
+    Dim number As Long
+    number = Inputbox("Enter a number: ", "Number to Words")
+    Messagebox ConvertNumberToWords(number)
+End Sub
