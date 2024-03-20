@@ -1,7 +1,0 @@
-$ git config --global user.name "Bob"
-
-$ git config --global user.email "bob@example.com"
-
-git add .
-git commit -m 'sdsada'
-git push
