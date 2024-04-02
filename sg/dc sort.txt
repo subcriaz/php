@@ -1,0 +1,65 @@
+Sub SortDocumentCollection(docCollection As NotesDocumentCollection, sortFieldName As String, ascending As Boolean)
+    Dim session As New NotesSession
+    Dim db As NotesDatabase
+    Dim tempDoc As NotesDocument
+    Dim tempArray() As Variant
+    Dim i As Integer
+    
+    ' Get the database
+    Set db = session.CurrentDatabase
+    
+    ' Initialize the temporary array
+    Redim tempArray(docCollection.Count - 1)
+    
+    ' Populate the temporary array with values to sort
+    i = 0
+    Set tempDoc = docCollection.GetFirstDocument
+    Do While Not tempDoc Is Nothing
+        tempArray(i) = tempDoc.GetItemValue(sortFieldName)(0)
+        i = i + 1
+        Set tempDoc = docCollection.GetNextDocument(tempDoc)
+    Loop
+    
+    ' Sort the temporary array
+    Call bubbleSort(tempArray, ascending)
+    
+    ' Clear the original collection
+    Call docCollection.RemoveAll(True)
+    
+    ' Repopulate the collection with sorted documents
+    For i = 0 To Ubound(tempArray)
+        Set tempDoc = db.GetDocumentByUNID(tempArray(i))
+        Call docCollection.AddDocument(tempDoc)
+    Next
+End Sub
+
+Sub bubbleSort(arr() As Variant, ascending As Boolean)
+    Dim i As Integer
+    Dim j As Integer
+    Dim temp As Variant
+    Dim swapped As Boolean
+    
+    For i = 0 To Ubound(arr) - 1
+        swapped = False
+        For j = 0 To Ubound(arr) - i - 1
+            If (ascending And arr(j) > arr(j + 1)) Or (Not ascending And arr(j) < arr(j + 1)) Then
+                temp = arr(j)
+                arr(j) = arr(j + 1)
+                arr(j + 1) = temp
+                swapped = True
+            End If
+        Next
+        ' If no two elements were swapped in the inner loop, then the array is sorted
+        If Not swapped Then Exit For
+    Next
+End Sub
+
+
+Dim session As New NotesSession
+Dim db As NotesDatabase
+Dim docCollection As NotesDocumentCollection
+
+Set db = session.CurrentDatabase
+Set docCollection = db.AllDocuments ' Or any other document collection you have
+
+SortDocumentCollection docCollection, "FieldName", True ' Sort in ascending order by FieldName
