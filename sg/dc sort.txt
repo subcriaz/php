@@ -1,6 +1,6 @@
 Sub SortDocumentCollection(docCollection As NotesDocumentCollection, sortFieldName As String, ascending As Boolean)
     Dim session As New NotesSession
-    Dim db As NotesDatabase
+    Dim db As NotesDatabase 
     Dim tempDoc As NotesDocument
     Dim tempArray() As Variant
     Dim i As Integer
