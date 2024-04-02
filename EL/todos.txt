@@ -1,0 +1,23 @@
+change gui of customer form
+
+hide extra action button on form
+
+hide all types of letters
+hide all views except what arr required
+
+same for property and payment dbs, 
+
+in first phase log db shall not be mentioned, we should not commit that everything shall be logged? 
+we should document whats log will cover. 
+
+
+document carefully what we deliver to client
+
+take images from client to design user interface
+
+take sample data of clients properties
+
+try to understand client current property and customers management
+
+- Rename Title CRM to Customer 
+- Change ICONs  
