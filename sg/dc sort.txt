@@ -63,3 +63,82 @@ Set db = session.CurrentDatabase
 Set docCollection = db.AllDocuments ' Or any other document collection you have
 
 SortDocumentCollection docCollection, "FieldName", True ' Sort in ascending order by FieldName
+
+
+
+Sub Click(Source As Button)
+	
+	Dim session As New NotesSession
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Dim entry As NotesViewEntry
+	Dim vc As NotesViewEntryCollection
+	Set db = session.CurrentDatabase
+	Set view = db.GetView("PRMPaymentSchemesEmbView")
+	view.AutoUpdate = False
+	
+	BatchNo   =  (Inputbox$("Start Batch No to extract  ? "))
+	
+	Set vc = view.GetAllEntriesByKey(BatchNo)
+	'Set entry = vc.GetNthEntry(3)
+	'Msgbox  vc.Count
+	For i=1 To  vc.Count
+		Set entry = vc.GetNthEntry(i)
+		Set doc = entry.Document
+		Print doc.Payment_Desc(0)
+	Next
+	
+	
+	Dim xlApp As Variant
+	Dim oWorkbook As Variant   
+	Set xlApp = CreateObject("Excel.Application") 
+	xlApp.Visible = True 'set to visible, this can be moved to the end if you wish
+	Set oWorkbook = xlApp.Workbooks 'handle to Workbook	oworkbook.Add 
+	oworkbook.Add 
+	
+	row = 3
+	col = 1	
+	xlApp.cells (row,col) =  "Batch "
+	col = col + 1
+	xlApp.cells (row,col) =  "Payment_Desc"
+	
+	
+	col = col + 1
+	xlApp.cells (row,col) =  "DueDate"
+	col = col + 1
+	xlApp.cells (row,col) =  "Plot_Phase" ' 4 
+	col = col + 1
+	xlApp.cells (row,col) =  "Payment_Amount" ' 4            
+	'//////////////////////
+	
+	row = 4
+	For i=1 To  vc.Count
+		Set entry = vc.GetNthEntry(i)
+		Set prop_doc = entry.Document
+		Print prop_doc.Payment_Desc(0)
+		
+		col = 1	
+		xlApp.cells (row,col) =  i   'prop_doc.Batch(0)
+		
+		col = col + 1
+		xlApp.cells (row,col) =  prop_doc.Payment_Desc(0)   ' 4 add		
+		col = col + 1
+		xlApp.cells (row,col) =  Format(Cstr(prop_doc.Due_Date(0)), "dd-mmm-yyyy")   ' 5 Mobile	
+		col = col + 1
+		xlApp.cells (row,col) =  prop_doc.Plot_Phase(0)   ' 4 add		
+		col = col + 1
+		xlApp.cells (row,col) =  prop_doc.Payment_Amount(0)   ' 5 Mobile	
+		
+NextDoc :	
+		row = row +1
+		'Set prop_doc = docCollection.GetNextDocument(prop_doc)	
+		
+	Next
+	
+mdone:	
+	Set  oWorkbook = Nothing    
+	Set xlApp =Nothing 
+	Print "done"
+	Exit Sub
+	
+End Sub
